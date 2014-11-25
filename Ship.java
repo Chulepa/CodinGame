@@ -18,7 +18,17 @@ class Player {
         int thrust = 0;
         
         void update(){
+            String R = "";
+            //TODO better angle analysys
+            if(pos.x<land.landingSite.x){
+                R = "" + Math.round(angle - 5);
+            }else if(pos.x>land.landingSite.x){
+                R = "" + Math.round(angle + 5);
+            }
             
+            
+            
+            System.out.println(R + "  4");
         }
     }
     
@@ -127,6 +137,10 @@ class Player {
         
         public String toString(){
             return ("x: " + x + " , y: " + y);
+        }
+        
+        public Vector2 copy(){
+            return new Vector2(x,y);
         }
     }
 }

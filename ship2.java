@@ -17,54 +17,70 @@ class Player {
         float fuel = 0f;
         int thrust = 0;
         int descentSpeed = -20;
+        int lateralTravelSpeed = 40;
         
         void update(){
             int R = 0;
             Vector2 desiredVel = new Vector2(0,0);
             
-            //Horizontal vel
-            if(land.isOverLandingPad(pos, 0.5f)){
+            //HORIZONTAL VEL
+            if(land.isOverLandingPad(pos, 1.0f)){
                 //if(vel.x > 15) desiredVel.x = 10;
                 //else if(vel.x <-15) desiredVel.x = -10;
             }else{
-                desiredVel.x = pos.x<land.landingSite.x ? 40 : -40;
+                desiredVel.x = pos.x<land.landingSite.x ? lateralTravelSpeed : -1*lateralTravelSpeed;
             }
             
-            if(pos.y < land.landingSite.y ) desiredVel.y = 50;
-            else{
+            //VERTICAL VEL
+            if(land.isOverLandingPad(pos, 1.0f)){
                 desiredVel.y = descentSpeed;
+            }else{
+                if(pos.y < land.landingSite.y + 400 ){
+                //RUNNING LOW
+                desiredVel.y = 50;
+                if(desiredVel.x>15) desiredVel.x = 15;
+                else if(desiredVel.x<-15) desiredVel.x = -15;
+                } 
+                else{
+                    desiredVel.y = descentSpeed;
+                }
             }
             
-            //calculate the acceleration en outputs
-            Vector2 desAcc = desiredVel.copy().subs(vel);
             
+            //calculate the acceleration outputs
+            //DESIRED ACCELERATION
+            Vector2 desAcc = desiredVel.copy().subs(vel);
             desAcc.sum(new Vector2(0f ,3.711f)); //gravity compensation
             
+            //DONT ACCELERATE DOWN, the gravity will do it fine.
             if(desAcc.y < 0) desAcc.y = 0;
             
             System.err.println(desAcc);
             
+            //Trucate ANGLE
             int dAngle = (int) Math.round(Math.toDegrees(Math.atan2(-desAcc.x,desAcc.y)));
             if(dAngle > 90 ) dAngle = 90;
             else if(dAngle< -90 ) dAngle = -90; 
             
-            
+            //CALCULATE THRUST LEVEL
             int dThrust = Math.round(desAcc.length());
             if(dThrust > 4) dThrust = 4;
             else if( dThrust < 0) dThrust = 0;
             
-            //Calculate if next step will be on land
-            if(land.isOverLandingPad(pos, 1.0f) && pos.copy().sum(vel).y -50 <= land.landingSite.y){
+            //BE FLAT TO LANDING
+            if(land.isOverLandingPad(pos, 1.0f) && pos.copy().sum(vel).sum(vel).y - 20 <= land.landingSite.y){
                 dAngle = 0;
             }
             
+            //FALLING TOO FAST?
             if(vel.y<-38) dAngle = 0;
             
+            //DONT THRUST IF NOT POINTING 90deg TO TARGET
             if(Math.abs(angle- dAngle)>90){
                 dThrust = 0;
             }
             
-            
+            //SENT OUTPUTS
             System.out.println(dAngle + " " + dThrust);
         }
     }
